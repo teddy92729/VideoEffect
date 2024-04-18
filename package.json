@@ -1,0 +1,19 @@
+{
+    "name": "videoeffect",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/main.mjs",
+    "scripts": {
+        "build": "webpack --config webpack.config.js --mode production",
+        "build-dev": "webpack --config webpack.config.js --mode development"
+    },
+    "author": "HYTeddy",
+    "license": "MIT",
+    "devDependencies": {
+        "webpack": "^5.89.0",
+        "webpack-cli": "^5.1.4"
+    },
+    "dependencies": {
+        "pixi.js": "^8.1.0"
+    }
+}
