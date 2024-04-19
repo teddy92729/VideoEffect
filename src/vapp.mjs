@@ -1,13 +1,7 @@
-import {
-    Texture,
-    autoDetectRenderer,
-    Sprite,
-    Filter,
-    NoiseFilter,
-} from "pixi.js";
-import { InitBase, log } from "./utils.mjs";
+import { Texture, autoDetectRenderer, Sprite, NoiseFilter } from "pixi.js";
+import { InitBase, log, error } from "./utils.mjs";
 import { Cover } from "./cover.mjs";
-// import shaders from "./shader.mjs";
+import { splitRGB } from "./filters.mjs";
 
 export class Vapp extends InitBase {
     /**
@@ -36,6 +30,10 @@ export class Vapp extends InitBase {
                 });
 
                 this.__sprite = new Sprite();
+                this.__sprite.filters = [
+                    splitRGB(0.5),
+                    new NoiseFilter({ noise: 0.03 }),
+                ];
                 this.__canvasElement = this.__renderer.canvas;
 
                 this.__resize();
@@ -44,24 +42,29 @@ export class Vapp extends InitBase {
                 );
 
                 log("Initializing Vapp Video Frame Callback");
-                this.__videoElement.requestVideoFrameCallback(() => {
-                    try {
-                        this.__update(); // test cors
-                        this.__videoElement.style.visibility = "hidden";
-                    } catch (e) {
-                        this.__cover.destroy();
-                    }
+                let checkCors = new Promise((resolve, reject) => {
+                    this.__videoElement.requestVideoFrameCallback(() => {
+                        try {
+                            this.__update(); // test cors
+                            this.__videoElement.style.visibility = "hidden";
+                            resolve();
+                        } catch (e) {
+                            this.__cover.destroy();
+                            reject(e);
+                        }
+                    });
                 });
+
                 log("Vapp initialized");
 
                 this.__cover = new Cover(
                     this.__videoElement,
                     this.__canvasElement
                 );
-                return this.__cover.initialized;
+                return Promise.all([this.__cover.initialized, checkCors]);
             })
             .catch((e) => {
-                log("Vapp initialization error", e);
+                error("Vapp initialization error", e);
             });
     }
 

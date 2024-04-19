@@ -21,3 +21,10 @@ export class InitBase {
 export let log = (...args) => {
     console.log(`[ VideoEffect ]`, ...args);
 };
+/**
+ * console.error
+ * @param  {...any} args
+ */
+export let error = (...args) => {
+    console.error(`[ VideoEffect ]`, ...args);
+};

@@ -16,7 +16,7 @@ module.exports = {
 // @namespace   Violentmonkey Scripts
 // @match       *://*/*
 // @grant       none
-// @run-at      document-body
+// @run-at      document-idle
 // @version     ${version}
 // @author      ${author}
 // @description ${new Date().toString()}
