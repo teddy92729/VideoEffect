@@ -1,7 +1,13 @@
 import { Texture, autoDetectRenderer, Sprite, NoiseFilter } from "pixi.js";
 import { InitBase, log, error } from "./utils.mjs";
 import { Cover } from "./cover.mjs";
-import { splitRGB } from "./filters.mjs";
+
+import { splitRGB } from "./shaders/splitRGB.mjs";
+import { Anime4k_Deblur_DOG } from "./shaders/Anime4k_Deblur_DOG.mjs";
+import { carton } from "./shaders/carton.mjs";
+import { HDR } from "./shaders/HDR.mjs";
+import { line } from "./shaders/line.mjs";
+import { deband } from "./shaders/deband.mjs";
 
 export class Vapp extends InitBase {
     /**
@@ -23,15 +29,21 @@ export class Vapp extends InitBase {
                 this.__renderer = await autoDetectRenderer({
                     width: videoElement.videoWidth,
                     height: videoElement.videoHeight,
-                    antialias: true,
-                    resolution: devicePixelRatio,
-                    autoDensity: false,
-                    transparent: false,
+                    antialias: false,
+                    resolution: 2,
+                    preferWebGLVersion: 2,
+                    powerPreference: "high-performance",
+                    preference: "webgl",
                 });
 
                 this.__sprite = new Sprite();
                 this.__sprite.filters = [
-                    splitRGB(0.5),
+                    // splitRGB(0.5),
+                    // carton(),
+                    deband(),
+                    HDR(),
+                    line(),
+                    Anime4k_Deblur_DOG(),
                     new NoiseFilter({ noise: 0.03 }),
                 ];
                 this.__canvasElement = this.__renderer.canvas;
@@ -40,6 +52,9 @@ export class Vapp extends InitBase {
                 this.__videoElement.addEventListener("resize", () =>
                     this.__resize()
                 );
+                this.__videoElement.addEventListener("playing", () => {
+                    this.__resize();
+                });
 
                 log("Initializing Vapp Video Frame Callback");
                 let checkCors = new Promise((resolve, reject) => {

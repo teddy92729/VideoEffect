@@ -17,6 +17,7 @@ export class Cover extends InitBase {
         this.__canvasElementContainer = document.createElement("div");
         this.__canvasElementContainer.style.position = "absolute";
         this.__canvasElementContainer.style.display = "block";
+        this.__canvasElementContainer.style.background = "no-repeat";
         this.__canvasElementContainer.appendChild(this.__canvasElement);
 
         this.__canvasElement.style.position = "absolute";
@@ -38,7 +39,7 @@ export class Cover extends InitBase {
         // fill the div element
         this.__canvasElement.style.height = "100%";
         this.__canvasElement.style.width = "100%";
-        this.__canvasElement.style.objectFit = "contain";
+        this.__canvasElement.style.objectFit = "cover";
 
         this.__videoElement.parentNode.insertBefore(
             this.__canvasElementContainer,

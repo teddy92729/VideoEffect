@@ -1,10 +1,10 @@
 import { Vapp } from "./vapp.mjs";
+import "pixi.js/unsafe-eval";
+
+let cache = new WeakMap();
 
 Array.from(document.querySelectorAll("video")).forEach((videoElement) => {
-    let app = new Vapp(videoElement);
-    app.initialized.then(() => {
-        app.__sprite.filters = filters;
-    });
+    cache.set(videoElement, new Vapp(videoElement));
 });
 
 let observer = new MutationObserver((mutationsList, observer) => {
@@ -12,10 +12,7 @@ let observer = new MutationObserver((mutationsList, observer) => {
         if (mutation.type === "childList") {
             for (let node of mutation.addedNodes) {
                 if (node.tagName === "VIDEO") {
-                    let app = new Vapp(node);
-                    app.initialized.then(() => {
-                        app.__sprite.filters = filters;
-                    });
+                    cache.set(node, new Vapp(node));
                 }
             }
         }

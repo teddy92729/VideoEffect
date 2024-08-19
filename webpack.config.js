@@ -5,13 +5,20 @@ module.exports = {
     output: {
         filename: `${name}-${version}.bundle.js`,
     },
+    module: {
+        rules: [
+            {
+                test: /\.glsl$/i,
+                use: "raw-loader",
+            },
+        ],
+    },
     plugins: [
         new optimize.LimitChunkCountPlugin({
             maxChunks: 1,
         }),
         new BannerPlugin({
-            banner: `
-// ==UserScript==
+            banner: `// ==UserScript==
 // @name        ${name}
 // @namespace   Violentmonkey Scripts
 // @match       *://*/*
