@@ -14,37 +14,46 @@ export class Cover extends InitBase {
         this.__canvasElement = canvasElement;
 
         // use div to cover video element
-        this.__canvasElementContainer = document.createElement("div");
-        this.__canvasElementContainer.style.position = "absolute";
-        this.__canvasElementContainer.style.display = "block";
-        this.__canvasElementContainer.style.background = "no-repeat";
-        this.__canvasElementContainer.appendChild(this.__canvasElement);
+        {
+            this.__canvasElementContainer = document.createElement("div");
+            this.__canvasElementContainer.style.position = "absolute";
+            this.__canvasElementContainer.style.display = "flex";
+            this.__canvasElementContainer.style.justifyContent = "center";
+            this.__canvasElementContainer.style.alignItems = "center";
+            this.__canvasElementContainer.style.overflow = "hidden";
+            this.__canvasElementContainer.style.pointerEvents = "none";
+            this.__canvasElementContainer.appendChild(this.__canvasElement);
 
-        this.__canvasElement.style.position = "absolute";
-        this.__canvasElement.style.display = "block";
+            this.__canvasElement.style.flex = "1 1 auto"; // fill the div element
+            this.__canvasElement.style.maxWidth = "100%";
+            this.__canvasElement.style.maxHeight = "100%";
 
-        // keep canvas at the center of div element
+            this.__videoElement.parentNode.insertBefore(
+                this.__canvasElementContainer,
+                this.__videoElement.nextSibling
+            );
+        }
 
-        // sometimes not work
-        // this.__canvasElement.style.top = "50%";
-        // this.__canvasElement.style.left = "50%";
-        // this.__canvasElement.style.transform = "translate(-50%, -50%)";
+        {
+            this.__removeObserver = new MutationObserver((mutationsList) => {
+                for (let mutation of mutationsList) {
+                    for (let node of mutation.removedNodes) {
+                        if (node === this.__videoElement) {
+                            this.destroy();
+                        }
+                    }
+                }
+            });
+            this.__removeObserver.observe(this.__videoElement.parentNode, {
+                childList: true,
+            });
+        }
 
-        this.__canvasElement.style.margin = "auto";
-        this.__canvasElement.style.top = "0px";
-        this.__canvasElement.style.bottom = "0px";
-        this.__canvasElement.style.left = "0px";
-        this.__canvasElement.style.right = "0px";
-
-        // fill the div element
-        this.__canvasElement.style.height = "100%";
-        this.__canvasElement.style.width = "100%";
-        this.__canvasElement.style.objectFit = "cover";
-
-        this.__videoElement.parentNode.insertBefore(
-            this.__canvasElementContainer,
-            this.__videoElement.nextSibling
-        );
+        {
+            this.__fit();
+            this.__resizeObserver = new ResizeObserver(this.__fit.bind(this));
+            this.__resizeObserver.observe(this.__videoElement);
+        }
 
         this.__initialized = new Promise((resolve) => {
             if (this.__videoElement.readyState > 0) resolve();
@@ -53,13 +62,6 @@ export class Cover extends InitBase {
                     once: true,
                 });
         })
-            .then(() => {
-                this.__fit();
-                this.__resizeObserver = new ResizeObserver(
-                    this.__fit.bind(this)
-                );
-                this.__resizeObserver.observe(this.__videoElement);
-            })
             .then(() => {
                 log("Cover initialized");
             })
@@ -72,11 +74,19 @@ export class Cover extends InitBase {
      * fit div to video element
      */
     __fit() {
-        let { width, height } = getComputedStyle(this.__videoElement);
-        this.__canvasElementContainer.style.width = width;
-        this.__canvasElementContainer.style.height = height;
-        this.__canvasElementContainer.style.top = `${this.__videoElement.offsetTop}px`;
-        this.__canvasElementContainer.style.left = `${this.__videoElement.offsetLeft}px`;
+        const vRect = this.__videoElement.getBoundingClientRect();
+        const pRect = this.__videoElement.parentNode.getBoundingClientRect();
+        const pCss = getComputedStyle(this.__videoElement.parentNode);
+
+        let top = vRect.top - pRect.top + parseFloat(`0${pCss.top}`);
+        let left = vRect.left - pRect.left + parseFloat(`0${pCss.left}`);
+        let width = vRect.width;
+        let height = vRect.height;
+
+        this.__canvasElementContainer.style.top = `${top}px`;
+        this.__canvasElementContainer.style.left = `${left}px`;
+        this.__canvasElementContainer.style.width = `${width}px`;
+        this.__canvasElementContainer.style.height = `${height}px`;
     }
 
     /**

@@ -61,7 +61,6 @@ export class Vapp extends InitBase {
                     this.__videoElement.requestVideoFrameCallback(() => {
                         try {
                             this.__update(); // test cors
-                            this.__videoElement.style.visibility = "hidden";
                             resolve();
                         } catch (e) {
                             this.__cover.destroy();
