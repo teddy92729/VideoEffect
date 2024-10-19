@@ -22,6 +22,8 @@ export class Cover extends InitBase {
             this.__canvasElementContainer.style.alignItems = "center";
             this.__canvasElementContainer.style.overflow = "hidden";
             this.__canvasElementContainer.style.pointerEvents = "none";
+            this.__canvasElementContainer.style.contentVisibility = "auto";
+            this.__canvasElementContainer.style.backgroundColor = "black";
             this.__canvasElementContainer.appendChild(this.__canvasElement);
 
             this.__canvasElement.style.flex = "1 1 auto"; // fill the div element
