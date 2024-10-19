@@ -1,5 +1,6 @@
-export class InitBase {
+export class InitBase extends EventTarget {
     constructor() {
+        super();
         /**
          * @type {Promise<any>}
          */
