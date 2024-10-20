@@ -14,62 +14,42 @@ export class Cover extends InitBase {
         this.__canvasElement = canvasElement;
 
         // use div to cover video element
-        {
-            this.__canvasElementContainer = document.createElement("div");
-            this.__canvasElementContainer.style.position = "absolute";
-            this.__canvasElementContainer.style.display = "flex";
-            this.__canvasElementContainer.style.justifyContent = "center";
-            this.__canvasElementContainer.style.alignItems = "center";
-            this.__canvasElementContainer.style.overflow = "hidden";
-            this.__canvasElementContainer.style.pointerEvents = "none";
-            this.__canvasElementContainer.style.contentVisibility = "auto";
-            this.__canvasElementContainer.style.backgroundColor = "black";
-            this.__canvasElementContainer.appendChild(this.__canvasElement);
-
-            this.__canvasElement.style.flex = "1 1 auto"; // fill the div element
-            this.__canvasElement.style.maxWidth = "100%";
-            this.__canvasElement.style.maxHeight = "100%";
-
-            this.__videoElement.parentNode.insertBefore(
-                this.__canvasElementContainer,
-                this.__videoElement.nextSibling
-            );
-        }
-
-        {
-            this.__removeObserver = new MutationObserver((mutationsList) => {
-                for (let mutation of mutationsList) {
-                    for (let node of mutation.removedNodes) {
-                        if (node === this.__videoElement) {
-                            this.destroy();
-                        }
+        this.__canvasElementContainer = document.createElement("div");
+        this.__canvasElementContainer.style.position = "absolute";
+        this.__canvasElementContainer.style.display = "flex";
+        this.__canvasElementContainer.style.justifyContent = "center";
+        this.__canvasElementContainer.style.alignItems = "center";
+        this.__canvasElementContainer.style.overflow = "hidden";
+        this.__canvasElementContainer.style.pointerEvents = "none";
+        this.__canvasElementContainer.style.contentVisibility = "auto";
+        this.__canvasElementContainer.style.backgroundColor = "black";
+        this.__canvasElementContainer.appendChild(this.__canvasElement);
+        // fill the div element
+        this.__canvasElement.style.flex = "1 1 auto";
+        this.__canvasElement.style.maxWidth = "100%";
+        this.__canvasElement.style.maxHeight = "100%";
+        // insert div after video element
+        this.__videoElement.parentNode.insertBefore(
+            this.__canvasElementContainer,
+            this.__videoElement.nextSibling
+        );
+        // remove cover when video element is removed
+        this.__removeObserver = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                for (let node of mutation.removedNodes) {
+                    if (node === this.__videoElement) {
+                        this.destroy();
                     }
                 }
-            });
-            this.__removeObserver.observe(this.__videoElement.parentNode, {
-                childList: true,
-            });
-        }
-
-        {
-            this.__fit();
-            this.__resizeObserver = new ResizeObserver(this.__fit.bind(this));
-            this.__resizeObserver.observe(this.__videoElement);
-        }
-
-        this.__initialized = new Promise((resolve) => {
-            if (this.__videoElement.readyState > 0) resolve();
-            else
-                this.__videoElement.addEventListener("canplay", resolve, {
-                    once: true,
-                });
-        })
-            .then(() => {
-                log("Cover initialized");
-            })
-            .catch((e) => {
-                log("Cover initialization error", e);
-            });
+            }
+        });
+        this.__removeObserver.observe(this.__videoElement.parentNode, {
+            childList: true,
+        });
+        // fit div to video element
+        this.__fit();
+        this.__resizeObserver = new ResizeObserver(this.__fit.bind(this));
+        this.__resizeObserver.observe(this.__videoElement);
     }
 
     /**

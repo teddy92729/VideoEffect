@@ -1,10 +1,4 @@
-import {
-    Texture,
-    autoDetectRenderer,
-    Sprite,
-    NoiseFilter,
-    EventEmitter,
-} from "pixi.js";
+import { Texture, autoDetectRenderer, Sprite, NoiseFilter } from "pixi.js";
 import { InitBase, log, error } from "./utils.mjs";
 import { Cover } from "./cover.mjs";
 
