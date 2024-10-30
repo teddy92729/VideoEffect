@@ -17,7 +17,7 @@ out vec4 color;
 #define MAIN_pos vPosition
 #define MAIN_tex(pos) texture(uOTexture, pos)
 //-------------------------------------------
-#define HDRPower 1.2
+#define HDRPower 1.05
 #define radius1 7.475000
 #define radius2 7.547000
 

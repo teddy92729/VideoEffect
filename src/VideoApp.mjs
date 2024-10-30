@@ -21,7 +21,7 @@ function filters(videoApp) {
         deband(),
         line(),
         Anime4k_Deblur_DOG(),
-        new NoiseFilter({ noise: 0.03 }),
+        // new NoiseFilter({ noise: 0.03 }),
         // splitRGB(0.5),
     ];
 }

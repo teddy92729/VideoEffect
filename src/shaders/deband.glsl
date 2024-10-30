@@ -17,42 +17,71 @@ out vec4 color;
 #define MAIN_pos vPosition
 #define MAIN_tex(pos) texture(uOTexture, pos)
 //-------------------------------------------
-#define power 1.
-#define range 1.
 
-#define pi_2 1.57079632679
-float get_luma(vec3 rgb) {
-    return dot(vec3(.299f, .587f, .114f), rgb);
+// Enhanced hash function with maximum noise
+float hash(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * vec3(443.897f, 441.423f, 437.195f));
+    p3 += dot(p3, p3.yzx + 19.19f);
+    return fract((p3.x + p3.y) * p3.z) - 0.5f;
 }
 
-vec4 hook() {
-    vec3 c = HOOKED_tex(HOOKED_pos).rgb;
-    vec3 bezier1 = vec3(0.f), bezier2 = vec3(0.f);
-    float p[6] = float[6](1.f, 5.f, 10.f, 10.f, 5.f, 1.f);
-
-    int i;
-    //vetical
-    for(i = -3; i < 0; ++i) bezier1 += p[i + 3] * HOOKED_texOff(vec2(0, i) * range).rgb;
-    for(i = 1; i <= 3; ++i) bezier1 += p[i + 2] * HOOKED_texOff(vec2(0, i) * range).rgb;
-    bezier1 /= 32.f;
-
-    //horizenal
-    for(i = -3; i < 0; ++i) bezier2 += p[i + 3] * HOOKED_texOff(vec2(i, 0) * range).rgb;
-    for(i = 1; i <= 3; ++i) bezier2 += p[i + 2] * HOOKED_texOff(vec2(i, 0) * range).rgb;
-    bezier2 /= 32.f;
-
-    //The closer the colors are, the blurrier they are.
-    bezier1 = mix(c, bezier1, pow(2.718f, -abs(get_luma(150.f / power * (bezier1 - c)))));
-    bezier2 = mix(c, bezier2, pow(2.718f, -abs(get_luma(150.f / power * (bezier2 - c)))));
-    c = bezier1 + bezier2 - c;
-    return vec4(c, 1.f);
-
-    //bezier1=mix(bezier1,c,dot(c,bezier1)/length(bezier1));
-    //bezier2=mix(bezier2,c,dot(c,bezier2)/length(bezier2));
-    //c=bezier1+bezier2-c;
-    //return vec4(c,1.0);
+// Much more aggressive threshold calculation
+float getThreshold(vec3 color) {
+    float luma = dot(color, vec3(0.299f, 0.587f, 0.114f));
+    // Drastically increased threshold range
+    return mix(1.0f / 255.0f, 4.0f / 255.0f, luma);
 }
 
 void main() {
-    color = hook();
+    vec4 texColor = HOOKED_tex(HOOKED_pos);
+
+    // Generate maximum strength noise pattern
+    // float noise = hash(HOOKED_pos * HOOKED_size); 
+
+    // Calculate adaptive threshold with maximum sensitivity
+    float threshold = getThreshold(texColor.rgb);
+
+    // Sample in a wider pattern for more aggressive detection
+    vec4 n1 = HOOKED_texOff(vec2(-2.0f, 0.0f));
+    vec4 n2 = HOOKED_texOff(vec2(2.0f, 0.0f));
+    vec4 n3 = HOOKED_texOff(vec2(0.0f, -2.0f));
+    vec4 n4 = HOOKED_texOff(vec2(0.0f, 2.0f));
+    vec4 n5 = HOOKED_texOff(vec2(-2.0f, -2.0f));
+    vec4 n6 = HOOKED_texOff(vec2(2.0f, 2.0f));
+    vec4 n7 = HOOKED_texOff(vec2(-1.0f, 1.0f));
+    vec4 n8 = HOOKED_texOff(vec2(1.0f, -1.0f));
+
+    // Calculate color differences with maximum sensitivity
+    vec4 diff = abs(texColor - n1) + abs(texColor - n2) +
+        abs(texColor - n3) + abs(texColor - n4) +
+        abs(texColor - n5) + abs(texColor - n6) +
+        abs(texColor - n7) + abs(texColor - n8);
+    float diffAmount = dot(diff.rgb, vec3(0.333f));
+
+    // Threshold for detecting banding
+    float bandingThreshold = threshold * 4.0f;
+
+    // Apply maximum strength dithering
+    vec3 dithered = texColor.rgb;
+
+    // Always apply base dithering
+    // dithered += noise * threshold * 0.5f;
+
+    // Additional strong per-channel noise
+    vec3 noiseColor = vec3(hash(HOOKED_pos * HOOKED_size + vec2(0.0f, 0.0f)), hash(HOOKED_pos * HOOKED_size + vec2(1.0f, 0.0f)), hash(HOOKED_pos * HOOKED_size + vec2(0.0f, 1.0f))) * threshold * 2.0f;
+
+    // dithered += noiseColor;
+
+    // Extra high-frequency noise layer
+    // vec3 highFreqNoise = vec3(hash(HOOKED_pos * HOOKED_size * 2.0f), hash(HOOKED_pos * HOOKED_size * 2.0f + vec2(0.5f)), hash(HOOKED_pos * HOOKED_size * 2.0f + vec2(1.0f))) * threshold;
+
+    // dithered += highFreqNoise;
+
+    // If in a banding-prone area, apply even more aggressive dithering
+    if(diffAmount < bandingThreshold) {
+        dithered += noiseColor;
+    }
+
+    // Ensure we stay within valid color range
+    color = vec4(clamp(dithered, 0.0f, 1.0f), texColor.a);
 }
