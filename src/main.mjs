@@ -1,15 +1,20 @@
-import { Vapp } from "./vapp.mjs";
+import { VideoApp } from "./VideoApp.mjs";
 import "pixi.js/unsafe-eval";
 import { log } from "./utils.mjs";
 
-let cache = new WeakMap();
+let cache = new Map();
 
 let observer = new MutationObserver((mutations) => {
     for (let mutation of mutations) {
         for (let node of mutation.addedNodes) {
-            if (node instanceof HTMLVideoElement) {
+            if (node instanceof HTMLVideoElement && !cache.has(node)) {
                 log("New video element detected", node);
-                cache.set(node, new Vapp(node));
+                let vapp = new VideoApp(node);
+                cache.set(node, vapp);
+                vapp.addEventListener("destroy", () => {
+                    cache.delete(node);
+                    console.log(cache);
+                });
             }
         }
     }
@@ -21,7 +26,12 @@ observer.observe(document.body, {
 
 document.querySelectorAll("video").forEach((videoElement) => {
     log("Video element detected", videoElement);
-    cache.set(videoElement, new Vapp(videoElement));
+    let vapp = new VideoApp(videoElement);
+    cache.set(videoElement, vapp);
+    vapp.addEventListener("destroy", () => {
+        cache.delete(videoElement);
+        console.log(cache);
+    });
 });
 
 log("Global initialized");
