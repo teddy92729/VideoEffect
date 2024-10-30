@@ -1,29 +1,34 @@
 #version 300 es
 precision highp float;
 in vec2 vTextureCoord;
-uniform vec4 uInputSize;
+in vec2 vPosition;
 uniform sampler2D uTexture;
-uniform float strength;
+uniform sampler2D uOTexture;
+uniform vec4 uInputSize;
+uniform vec4 uOutputFrame;
 out vec4 color;
+
 //-------------------------------------------
-#define MAIN_pos vTextureCoord
-#define MAIN_tex(pos)texture(uTexture,pos)
-#define Orginal_tex(pos)texture(Orginal,pos)
-#define MAIN_pt uInputSize.zw
-#define MAIN_texOff(offset)MAIN_tex(MAIN_pos+(offset)*MAIN_pt)
+#define HOOKED_pos      vTextureCoord
+#define HOOKED_tex(pos) texture(uTexture, pos)
+#define HOOKED_pt       uInputSize.zw
+#define HOOKED_size       uInputSize.xy
+#define HOOKED_texOff(offset) HOOKED_tex(HOOKED_pos+(offset)*HOOKED_pt)
+#define MAIN_pos vPosition
+#define MAIN_tex(pos) texture(uOTexture, pos)
 //-------------------------------------------
 #define EdgeSlope 2.
 #define Power 1.
 
-float get_luma(vec4 rgba){
-    return dot(vec4(.299,.587,.114,0.),rgba);
+float get_luma(vec4 rgba) {
+    return dot(vec4(.299f, .587f, .114f, 0.f), rgba);
 }
 
-void main(){
-    float diff1=get_luma(MAIN_texOff(vec2(1,1)));
-    diff1=get_luma(MAIN_texOff(vec2(-1,-1)))-diff1;
-    float diff2=get_luma(MAIN_texOff(vec2(1,-1)));
-    diff2=get_luma(MAIN_texOff(vec2(-1,1)))-diff2;
-    float edge=diff1*diff1+diff2+diff2;
-    color=clamp(pow(abs(edge),EdgeSlope)*-Power+MAIN_tex(MAIN_pos),0.,1.);
+void main() {
+    float diff1 = get_luma(HOOKED_texOff(vec2(1, 1)));
+    diff1 = get_luma(HOOKED_texOff(vec2(-1, -1))) - diff1;
+    float diff2 = get_luma(HOOKED_texOff(vec2(1, -1)));
+    diff2 = get_luma(HOOKED_texOff(vec2(-1, 1))) - diff2;
+    float edge = diff1 * diff1 + diff2 + diff2;
+    color = clamp(pow(abs(edge), EdgeSlope) * -Power + HOOKED_tex(HOOKED_pos), 0.f, 1.f);
 }

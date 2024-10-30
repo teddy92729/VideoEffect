@@ -1,14 +1,19 @@
 #version 300 es
 precision highp float;
 in vec2 vTextureCoord;
-uniform vec4 uInputSize;
+in vec2 vPosition;
 uniform sampler2D uTexture;
-uniform float strength;
+uniform sampler2D uOTexture;
+uniform vec4 uInputSize;
+uniform vec4 uOutputFrame;
 out vec4 color;
+
 //-------------------------------------------
-#define MAIN_pos vTextureCoord
-#define MAIN_tex(pos)texture(uTexture,pos)
-#define Orginal_tex(pos)texture(Orginal,pos)
-#define MAIN_pt uInputSize.zw
-#define MAIN_texOff(offset)MAIN_tex(MAIN_pos+(offset)*MAIN_pt)
+#define HOOKED_pos      vTextureCoord
+#define HOOKED_tex(pos) texture(uTexture, pos)
+#define HOOKED_pt       uInputSize.zw
+#define HOOKED_size       uInputSize.xy
+#define HOOKED_texOff(offset) HOOKED_tex(HOOKED_pos+(offset)*HOOKED_pt)
+#define MAIN_pos vPosition
+#define MAIN_tex(pos) texture(uOTexture, pos)
 //-------------------------------------------

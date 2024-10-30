@@ -1,22 +1,27 @@
 #version 300 es
 precision highp float;
 in vec2 vTextureCoord;
-uniform vec4 uInputSize;
+in vec2 vPosition;
 uniform sampler2D uTexture;
-uniform float strength;
+uniform sampler2D uOTexture;
+uniform vec4 uInputSize;
+uniform vec4 uOutputFrame;
 out vec4 color;
+
 //-------------------------------------------
-#define MAIN_pos vTextureCoord
-#define MAIN_tex(pos)texture(uTexture,pos)
-#define Orginal_tex(pos)texture(Orginal,pos)
-#define MAIN_pt uInputSize.zw
-#define MAIN_texOff(offset)MAIN_tex(MAIN_pos+(offset)*MAIN_pt)
+#define HOOKED_pos      vTextureCoord
+#define HOOKED_tex(pos) texture(uTexture, pos)
+#define HOOKED_pt       uInputSize.zw
+#define HOOKED_size       uInputSize.xy
+#define HOOKED_texOff(offset) HOOKED_tex(HOOKED_pos+(offset)*HOOKED_pt)
+#define MAIN_pos vPosition
+#define MAIN_tex(pos) texture(uOTexture, pos)
 //-------------------------------------------
 
 #define RSplit vec2(-1.,1.)*strength
 #define GSplit vec2(1.,-1.)*strength
 #define BSplit vec2(0.,0.)*strength
 
-void main(){
-    color=vec4(MAIN_texOff(RSplit).r,MAIN_texOff(GSplit).g,MAIN_texOff(BSplit).b,1.);
+void main() {
+    color = vec4(HOOKED_texOff(RSplit).r, HOOKED_texOff(GSplit).g, HOOKED_texOff(BSplit).b, 1.f);
 }

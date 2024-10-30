@@ -1,20 +1,24 @@
 #version 300 es
 precision highp float;
 in vec2 vTextureCoord;
-uniform vec4 uInputSize;
+in vec2 vPosition;
 uniform sampler2D uTexture;
 uniform sampler2D uOTexture;
+uniform vec4 uInputSize;
+uniform vec4 uOutputFrame;
 out vec4 color;
+
 //-------------------------------------------
-#define MAIN_pos      vTextureCoord
-#define MAIN_tex(pos) texture(uTexture, pos)
-#define Orginal_tex(pos) texture(uOTexture, pos)
-#define MAIN_pt       uInputSize.zw
-#define MAIN_size       uInputSize.xy
-#define MAIN_texOff(offset) MAIN_tex(MAIN_pos+(offset)*MAIN_pt)
+#define HOOKED_pos      vTextureCoord
+#define HOOKED_tex(pos) texture(uTexture, pos)
+#define HOOKED_pt       uInputSize.zw
+#define HOOKED_size       uInputSize.xy
+#define HOOKED_texOff(offset) HOOKED_tex(HOOKED_pos+(offset)*HOOKED_pt)
+#define MAIN_pos vPosition
+#define MAIN_tex(pos) texture(uOTexture, pos)
 //-------------------------------------------
 
-#define go_0(x_off, y_off) (max((MAIN_texOff(vec2(x_off, y_off))), 0.0))
+#define go_0(x_off, y_off) (max((HOOKED_texOff(vec2(x_off, y_off))), 0.0))
 vec4 hook() {
     vec4 result = mat4(-0.00055252935f, 0.0011350953f, -0.0016148019f, 0.0014946404f, -0.30635214f, -0.017596753f, -0.0036547943f, 0.016236471f, 0.005174489f, 0.0030302007f, 0.00019672248f, 0.0006430973f, 0.0007490077f, -0.0031795658f, -6.158733e-05f, 0.0006820584f) * go_0(-1.0f, -1.0f);
     result += mat4(0.15602079f, 0.011071071f, -0.0027609533f, -0.0034318874f, -0.0039016667f, 0.016504101f, -0.27816474f, -0.008282344f, 0.19063498f, 0.012465078f, 0.010091085f, -0.004841106f, -0.11758087f, -0.012808949f, 0.0067606894f, 0.005216566f) * go_0(-1.0f, 0.0f);
