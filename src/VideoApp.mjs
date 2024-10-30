@@ -1,10 +1,4 @@
-import {
-    Texture,
-    Sprite,
-    NoiseFilter,
-    WebGLRenderer,
-    Rectangle,
-} from "pixi.js";
+import { Texture, Sprite, NoiseFilter, WebGLRenderer } from "pixi.js";
 import { log, error } from "../old/utils.mjs";
 import { Container } from "./Container.mjs";
 
@@ -92,6 +86,7 @@ export class VideoApp extends EventTarget {
                 );
 
                 video.requestVideoFrameCallback(() => this.update());
+                log("VideoApp initialized");
             })
             .catch(error);
 
@@ -116,15 +111,17 @@ export class VideoApp extends EventTarget {
 
         this._texture.update();
         this._texture.updateUvs();
-        this._sprite.filterArea = new Rectangle(0, 0, videoWidth, videoHeight);
         this._renderer.resize(videoWidth, videoHeight);
         this.dispatchEvent(new Event("resize"));
     }
 
     destroy() {
+        if (this._destroyed) return;
+        this._destroyed = true;
         this._texture?.destroy();
         this._sprite?.destroy();
         this._renderer?.destroy();
+        this._container.destroy();
         this.dispatchEvent(new Event("destroy"));
     }
     get container() {

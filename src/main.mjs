@@ -13,7 +13,6 @@ let observer = new MutationObserver((mutations) => {
                 cache.set(node, vapp);
                 vapp.addEventListener("destroy", () => {
                     cache.delete(node);
-                    console.log(cache);
                 });
             }
         }
@@ -30,7 +29,6 @@ document.querySelectorAll("video").forEach((videoElement) => {
     cache.set(videoElement, vapp);
     vapp.addEventListener("destroy", () => {
         cache.delete(videoElement);
-        console.log(cache);
     });
 });
 

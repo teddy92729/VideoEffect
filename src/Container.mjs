@@ -41,8 +41,11 @@ export class VideoContainer extends EventTarget {
         this._ready.then(() => this.dispatchEvent(new Event("ready")));
         this._abortController = new AbortController();
         this._abortSignal = this._abortController.signal;
+        this._destroyed = false;
     }
     destroy() {
+        if (this._destroyed) return;
+        this._destroyed = true;
         this._remover.disconnect();
         this._abortController.abort();
         this.dispatchEvent(new Event("destroy"));
@@ -82,8 +85,11 @@ export class CanvasContainer {
         this._canvas.style.flex = "1 1 auto";
         this._canvas.style.maxWidth = "100%";
         this._canvas.style.maxHeight = "100%";
+        this._destroyed = false;
     }
     destroy() {
+        if (this._destroyed) return;
+        this._destroyed = true;
         this._container.remove();
     }
     get canvas() {
@@ -115,8 +121,12 @@ export class Container extends EventTarget {
         document.addEventListener("visibilitychange", () => this.resize(), {
             signal: this._videoContainer.abortSignal,
         });
+        this._destroyed = false;
     }
     destroy() {
+        if (this._destroyed) return;
+        this._destroyed = true;
+        this._videoContainer.destroy();
         this._canvasContainer.destroy();
         this._resizeObserver.disconnect();
         this.dispatchEvent(new Event("destroy"));
