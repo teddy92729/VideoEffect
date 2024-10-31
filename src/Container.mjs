@@ -116,7 +116,7 @@ export class Container extends EventTarget {
 
         this._resizeObserver = new ResizeObserver(() => this.resize());
         this._resizeObserver.observe(video, {
-            box: "device-pixel-content-box",
+            box: "border-box",
         });
         document.addEventListener("visibilitychange", () => this.resize(), {
             signal: this._videoContainer.abortSignal,
