@@ -9,20 +9,23 @@ import { Anime4K_3DGraphics_AA_Upscale_x2_US } from "./shaders/Anime4K_3DGraphic
 import { HDR } from "./shaders/HDR.mjs";
 import { line } from "./shaders/line.mjs";
 import { deband } from "./shaders/deband.mjs";
+import { Anime4K_Restore_CNN_Soft_S } from "./shaders/Anime4K_Restore_CNN_Soft_S/Anime4K_Restore_CNN_Soft_S.mjs";
 /**
  * @param {VideoApp} videoApp
  */
 function filters(videoApp) {
     return [
-        deband(),
-        carton(),
-        ...Anime4K_3DGraphics_AA_Upscale_x2_US(videoApp._texture.source),
+        // deband(),
+        // carton(),
+        // ...Anime4K_3DGraphics_AA_Upscale_x2_US(videoApp._texture.source),
+        ...Anime4K_Restore_CNN_Soft_S(videoApp._texture.source),
+        splitRGB(0.3),
         HDR(),
         deband(),
+        splitRGB(-0.2),
         line(),
         Anime4k_Deblur_DOG(),
         // new NoiseFilter({ noise: 0.03 }),
-        // splitRGB(0.5),
     ];
 }
 
@@ -42,7 +45,7 @@ export class VideoApp extends EventTarget {
                 return this._renderer.init({
                     width: video.videoWidth,
                     height: video.videoHeight,
-                    antialias: true,
+                    antialias: false,
                     canvas: canvas,
                     resolution: 1,
                     powerPreference: "high-performance",
@@ -91,6 +94,7 @@ export class VideoApp extends EventTarget {
             .catch(error);
 
         this._container.addEventListener("destroy", () => this.destroy());
+        this._destroyed = false;
     }
 
     update() {
