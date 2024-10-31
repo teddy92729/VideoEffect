@@ -18,6 +18,8 @@ out vec4 color;
 #define MAIN_tex(pos) texture(uOTexture, pos)
 //-------------------------------------------
 
+uniform float strength;
+
 #define RSplit vec2(-1.,1.)*strength
 #define GSplit vec2(1.,-1.)*strength
 #define BSplit vec2(0.,0.)*strength
